@@ -1,0 +1,226 @@
+<html>
+<head>
+  <base href="/">
+  <style type="text/css">
+    body {display:none}
+  </style>
+</head>
+<body>
+  <div class="working">
+    <script type="text/template" id="progress">
+      <img src="assets/lightning-logo.png" />
+      <div class="progress-status">{{status}}</div>
+      <div class="progress">
+        <div class="progress-bar" style="width: {{Math.min(100,Math.max(0,width))}}%"></div>
+      </div>
+    </script>
+    <div class="working-info">
+    </div>
+  </div>
+  <div id="login">
+    <form class="loginBox" onsubmit="app.login.submit(); return false">
+      <img src="assets/lightning-logo.png" />
+      <h1>Earth Bar Software</h1>
+      <h2>Please log in</h2>
+      <div class="username">
+        <label>Username</label>
+        <input type="text" name="username" />
+      </div>
+      <div class="loginError NotAuthorizedException UserNotFoundException InvalidParameterException">Incorrect username or password</div>
+      <div class="loginError PasswordMismatch">Password and repeated password must match</div>
+      <div class="loginError NewPasswordRequired">New password required</div>
+      <div class="loginError InvalidPasswordException">Password must contain letters, numbers and a special character or two</div>
+      <div class="regularPassword">
+        <label>Password</label>
+        <input type="password" name="password" />
+      </div>
+      <div class="newPassword">
+        <label>New Password</label>
+        <input type="password" name="newPassword" />
+        <label>Repeat Password</label>
+        <input type="password" name="repeatPassword" />
+      </div>
+      <div class="loginControls">
+        <input type="submit" value="Submit" />
+      </div>
+    </form>
+  </div>
+  <div id="dashboard">
+    <p><a onclick="app.signOut()">Log out</a></p>
+    <p>This is where you will see and search previous drawings.</p>
+    <p><a onclick="app.goto('editor')">New bar</a></p>
+    <div class="filters"></div>
+    <div class="dashboard-drawings"></div>
+    <script type="text/template" id="dashboard-filter-item">
+      <div class="dashboard-filter-item">
+        <div class="filter-top">
+          <h1>{{filter.name}}</h1>
+          <input type="button" onclick="app.dashboard.removeFilter('{{filter.name}}')" value="Remove" />
+        </div>
+        <div class="filter-inputs">
+          {{filter.options ? `<select name="${filter.selector}" onchange="app.dashboard.updateFilters()">` + filter.options.map(option => `<option ${(filter.value ? filter.value===option : filter.default===option) ? 'selected' : ''}>${option}</option>`) + `</select>` : ''}}
+          {{filter.max ? `<input type="number" name="${filter.selector}" value="${filter.value || filter.default}" min="${filter.min || 0}" max="${filter.max || 10}" onchange="app.dashboard.updateFilters()" />` : ''}}
+          {{filter.max ? `<select class="operator" name="${filter.selector}_operator" onchange="app.dashboard.updateFilters()">${['<','<=','==','>=','>'].map(op => '<option ' + ((filter.operator || '==') === op ? 'selected' : '') + '>' + op + '</option>').join('')}</select>` : ''}}
+        </div>
+      </div>
+    </script>
+    <script type="text/template" id="dashboard-filter">
+      <h5>Filters</h5>
+      <div class="filter-controls">
+        <select id="filter-select">
+          {{filterNames.map(name => `<option>${name}</option>`).join('')}}
+        </select>
+        <input type="button" onclick="app.dashboard.addFilter()" value="Add" />
+      </div>
+      <div class="filter-items">
+        {{filters.map(filter => app.fillTemplate(app.$('#dashboard-filter-item').innerText, {filter})).join('')}}
+      </div>
+    </script>
+    <script type="text/template" id="dashboard-item">
+      <div class="dashboard-item">
+        <h3>ANW-EBC-{{number}}{{version>1?'-' + (version-1) : ''}}</h3>
+        <p>{{user}}</p>
+        <p>{{new Date(this.createDate || new Date()).toString().split(/\s|:/g).reduce((res, bit, i) => res + ([1,2,3,4,5].includes(i) ? bit + ['', ' ', ' ', ', ', ':', ''][i] : ''), '')}}</p>
+        <div class="controls"><a onclick='app.dashboard.pdf("{{id}}")'>Pdf</a><a onclick='app.goto("/editor/{{id}}")'>Edit</a><a onclick='app.dashboard.delete("{{id}}")'>Delete</a><a onclick='app.dashboard.clone("{{id}}")'>Clone</a></div>
+        <a onclick='app.goto("/editor/{{id}}")' class='thumbnails'>
+          {{!this.noImages ? '' : new Array(noImages).fill(0).map((f,i) => `<img src="https://wallis-app-dev.s3.eu-west-1.amazonaws.com/thumbnails/${id}-${revisions.length}-${i}.png" />`).join('')}}
+          
+        </a>
+      </div>
+    </script>
+    <script type="text/template" id="dashboard-paging">
+      <div class="dashboard-paging">
+        <p>Total {{totalTotal}}</p>
+        {{totalTotal!==filteredTotal?`<p>Filtered ${filteredTotal}</p>`:''}}
+        <input type="number" onchange="app.dashboard.updateFilters()" value="{{pageSize}}" id="page-size" min="1" max="200" />
+        <p>Page {{page + 1}}/{{noPages}}</p>
+        <input type="button" onclick='app.dashboard.setPage({{page - 1}})' value="Prev" {{page===0?'disabled':''}} />
+        <input type="button" onclick='app.dashboard.setPage({{page + 1}})' value="Next" {{page>=noPages-1?'disabled':''}}/>
+      </div>
+    </script>
+    <script type="text/template" id="dashboard-sorting">
+      <div class="dashboard-sorting">
+        <div class="icon sort">&nbsp;</div>
+        <select id="sort-selector" onchange="app.dashboard.resetDir() || app.dashboard.updateFilters()">
+          {{sortOptions.map(option => `<option value="${option.selector}" ${option.selector===sorting.selector?'selected':''}>${option.name}</option>`).join('')}}
+        </select>
+        <select id="sort-direction" onchange="app.dashboard.updateFilters()">
+          <option value="1" {{sorting.dir==1?'selected':''}}>Ascending</option>
+          <option value="-1" {{sorting.dir==-1?'selected':''}}>Descending</option>
+        </select>
+      </div>
+    </script>
+    <script type="text/template" id="dashboard-drawings">
+      <div class="list-controls-top">
+        {{app.fillTemplate(app.$('#dashboard-sorting').innerText, {sorting,sortOptions})}}
+        {{app.fillTemplate(app.$('#dashboard-paging').innerText, paging)}}
+      </div>
+      {{!paging.filteredTotal?'<h3>Nothing matches the current filters</h3>':''}}
+      <div class="dashboard-drawings-grid">
+        {{drawings.map(drawing => app.fillTemplate(app.$('#dashboard-item').innerText, drawing)).join('')}}
+      </div>
+      <div class="list-controls-bottom">
+        {{app.fillTemplate(app.$('#dashboard-paging').innerText, paging)}}
+      </div>
+    </script>
+  </div>
+  <div id="drawing">
+    <h1>this is the drawing page</h1>
+  </div>
+  <div id="editor">
+    <script type="text/template" id="duplicate-item">
+      <div class="duplicate-item">
+        <h3>Duplicate of ANW-EBC-{{number}}{{version>1?'-' + (version-1) : ''}}</h3>
+        <p>{{user}}</p>
+        <a onclick='app.goto("/editor/{{id}}")' class='thumbnails'>
+          {{!this.noImages ? '' : new Array(noImages).fill(0).map((f,i) => `<img src="https://wallis-app-dev.s3.eu-west-1.amazonaws.com/thumbnails/${id}-${revisions.length}-${i}.png" />`).join('')}}
+          
+        </a>
+      </div>
+    </script>
+    <div id="menu">
+      <div class="base"><form></form></div>
+      <div class="terminations">
+        <h2>Bar sections</h2>
+        <div class="bars" onmouseout="app.editor.clearHighlights()"></div>
+      </div>
+    </div>
+    <div id="container">
+      <canvas id="three"></canvas>
+      <canvas id="labels"></canvas>
+      <div class="info"></div>
+      <div class="camera-controls">
+        <div class="duplicates">
+        </div>
+        <div>
+          <input type="button" onclick="app.editor.whiteMode()" value="Light Mode" class="camera-top white-mode" />
+          <input type="button" onclick="app.goto('dashboard')" value="Dashboard" class="camera-top" />
+          <input type="button" onclick="app.editor.save()" value="Save" class="camera-top" />
+          <input type="button" onclick="app.editor.setCameraView('top')" value="Top" class="camera-top" />
+          <input type="button" onclick="app.editor.setCameraView('end')" value="End" class="camera-end" />
+          <input type="button" onclick="app.editor.setCameraView('side')" value="Side" class="camera-side" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <modal class="hidden">
+    <div class="modal-content">
+
+    </div>
+  </modal>
+  <script type="text/template" id="modal-pdf-index">
+    <div class="modal-heading">
+      <h1>ANW-EBC-{{selection.number}}{{selection.version>1?'-' + (selection.version-1) : ''}}</h1>
+      <input type="button" onclick="modal.close(true)" value="close" />
+    </div>
+    <div class="components"></div>
+    <input type="button" onclick="modal.render('customer')" value="customer" />
+    <input type="button" onclick="modal.render('manufacturer')" value="manufacturer" />
+    <input type="button" onclick="modal.changePage('costings')" value="costings" disabled />
+  </script>
+  <script type="text/template" id="modal-pdf-customer">
+    <h1>{{selection.number}}</h1>
+    <input type="button" onclick="modal.changePage('index')" value="back" />
+    <input type="button" onclick="modal.close(true)" value="close" />
+  </script>
+  <script type="text/template" id="modal-pdf-manufacturer">
+    <h1>{{selection.number}}</h1>
+    <input type="button" onclick="modal.changePage('index')" value="back" />
+    <input type="button" onclick="modal.close(true)" value="close" />
+  </script>
+  <script type="text/template" id="modal-pdf-costings">
+    <h1>{{selection.number}}</h1>
+    <input type="button" onclick="modal.changePage('index')" value="back" />
+    <input type="button" onclick="modal.close(true)" value="close" />
+  </script>
+  <script type="text/template" id="modal-pdf-components">
+    <div class="component-options">
+      <div></div><div></div><div></div><div></div><div class="r">Unit cost</div><div class="r">Total cost</div>
+      {{selection.components.map((component,i) => app.fillTemplate(app.$('#modal-pdf-components-component').innerText, {selection,component,i})).join('')}}
+      <h3>Operation cost</h3><div></div><div></div><div></div><div class="r"></div>
+      <input type="text" value="{{(selection.operationCost = selection.manufacturingTime.total / 1000 / 60 / 60 * (selection.base.client==='Wallis'?18:11.5)).toFixed(2)}}" class="operationCost r"  onchange="modal.refresh() || modal.refresh()" />
+      <div></div><div></div><div></div><div></div><div>Subtotal</div><input type="text" class="r" value="{{(selection.subTotal = (selection.components.reduce((res, component) => res + +component.totalCost, 0) + selection.operationCost)).toFixed(2)}}" disabled />
+      <div></div><div></div><div></div><div class="r">Margin</div><input type="text" value="{{selection.marginPercent || (selection.marginPercent=50)}}" class="marginPercent r"  onchange="modal.refresh() || modal.refresh()" />
+      <input type="text" value="{{(selection.margin = selection.subTotal * (selection.marginPercent / 100)).toFixed(2)}}" class="margin r"  onchange="modal.refresh() || modal.refresh()" />
+      <div></div><div></div><div></div><div></div><div></div>
+      <h2 class="r {{app.$('modal input.error') ? ' error':''}}">{{selection.totalCost = ((selection.subTotal + selection.margin) || 0).toFixed(2)}}</h2>
+    </div>
+  </script>
+  <script type="text/template" id="modal-pdf-components-component">
+    <h3>{{component.quantity * +selection.base.quantity}}</h3>
+    <h3>{{component.name}}{{(component.quantity * +selection.base.quantity)>1?'s':''}}</h3>
+    <h3>{{component.size}}{{(component.length) ? (component.size ? ' x ' : '') + component.length : ''}}</h3>
+    <select id="components[{{i}}].code" onchange="modal.refresh() || modal.refresh()">{{component.options.map(option => '<option value="' + option.code + '"' + (component.code===option.code?' selected':'') + '>' + option.description + '</option>').join('')}}</select>
+    <input type="text" id="components[{{i}}].unitCost" value="{{component.unitCost || (component.unitCost = (component.options.find(option => option.code === component.code) || {price:0}).price)}}" onchange="modal.refresh() || modal.refresh()" class="r {{!(+component.unitCost || 0) ? ' error':''}}" />
+    <input type="text" id="components[{{i}}].totalCost" value="{{(+(component.totalCost = component.totalCost || ((Math.round((component.unitCost || 0) * 100) / 100) * component.quantity * (component.length ? component.length / 100 : 1) * +selection.base.quantity).toFixed(2))).toFixed(2)}}" onchange="modal.refresh() || modal.refresh()" class="r totalCost {{!(+component.totalCost || 0) ? ' error':''}} {{((Math.round((component.unitCost || 0) * 100) / 100) * component.quantity * (component.length ? component.length / 100 : 1) * +selection.base.quantity).toFixed(2)!==(+component.totalCost).toFixed(2) ? ' error':''}}" />
+  </script>
+  <script type="text/template" id="modal-pdf-components-termination-component">
+    <h3>{{name}}</h3>
+  </script>
+  <svg>
+    <filter id="blurFilter">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5"></feGaussianBlur>
+    </filter>
+  </svg>
+</body>
+</html>

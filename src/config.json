@@ -1,0 +1,10 @@
+{
+  "api": {
+    "url": "https://digz85aig5.execute-api.eu-west-1.amazonaws.com/Prod"
+  },
+  "cognito": {
+    "region": "eu-west-1",
+    "userPoolId": "eu-west-1_CWCy5VxsX",
+    "userPoolWebClientId": "5216svslltfuaan341n99akrt3"
+  }
+}

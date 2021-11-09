@@ -1,0 +1,40 @@
+{
+  "Bar material / finish": {
+    "Hard drawn plain copper": "Bare Hard Drawn Copper Bar",
+    "Hard drawn tinned copper": "Tinned Hard Drawn Copper Bar",
+    "Stainless steel": "Bare Stainless Steel Bar",
+    "Copper nickel plated": "Nickel Plated Hard Drawn Copper Bar",
+    "Aluminium": "Bare Hard Drawn Aluminum Bar",
+    "Bright zinc plated": "",
+    "Hot dipped galvanised": "Hot Dipped Galvanised Steel Bar",
+    "Silver plated hard drawn copper": "Silver Plated Hard Drawn Copper Bar"
+  },
+  "INSULATOR CONNECTION": {
+    "Black reinforced polyester": "BLACK REINFORCED POLYESTER",
+    "LSF": "LSF BLACK REINFORCED POLYESTER",
+    "Phosphor bronze": "PHOSPHOR BRONZE",
+    "Stainless steel A2 grade 304 (non-compliant)": "STAINLESS STEEL",
+    "Stainless steel A4 grade 316(non-compliant)": "A4 STAINLESS STEEL"
+  },
+  "TERMINATION CONNECTION": {
+    "Phosphor bronze": "PHOSPHOR BRONZE",
+    "Brass (non-compliant)": "BRASS",
+    "Bright zinc plated (non-compliant)": "BZP",
+    "Stainless steel A2 grade 304 (non-compliant)": "STAINLESS STEEL",
+    "Stainless steel A4 grade 316(non-compliant)": "A4 STAINLESS STEEL",
+    "Brass nickel plated (non-compliant)": "BRASS NICKEL PLATED"
+  },
+  "Base material": {
+    "Black PVC (full length)": "BLACK PVC",
+    "AVG galvanised steel (full length)": "GALVANISED STEEL",
+    "Stainless steel SS316 (full length)": "STAINLESS STEEL",
+    "ACHAN1 galvanised mild steel (full length)": "GALVANISED MILD STEEL",
+    "Bright zinc plated (full length)": "BRIGHT ZINC PLATED",
+    "Hot dipped galvanised (full length)": "HOT DIPPED GALVANISED",
+    "AVG galvanised steel": "GALVANISED STEEL",
+    "stainless steel SS316": "STAINLESS STEEL",
+    "ACHAN1 galvanised mild steel": "GALVANISED MILD STEEL",
+    "Bright zinc plated": "BRIGHT ZINC PLATED",
+    "Hot dipped galvanised": "HOT DIPPED GALVANISED"
+  }
+}

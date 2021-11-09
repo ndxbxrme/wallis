@@ -1,0 +1,163 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'wallis-app
+
+  Sample SAM Template for wallis-app
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+  Api:
+    Cors:
+      AllowMethods: '''*'''
+      AllowHeaders: '''Authorization,Content-Type'''
+      AllowOrigin: '''*'''
+Resources:
+  MyApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowMethods: '''*'''
+        AllowHeaders: '''Authorization,Content-Type'''
+        AllowOrigin: '''*'''
+      Auth:
+        DefaultAuthorizer: MyCognitoAuthorizer
+        Authorizers:
+          MyCognitoAuthorizer:
+            UserPoolArn:
+              Fn::GetAtt:
+              - MyCognitoUserPool
+              - Arn
+        AddDefaultAuthorizerToCorsPreflight: false
+  MyCognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: WallisUserPool
+  MyCognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId:
+        Ref: MyCognitoUserPool
+      ClientName: WallisUserPoolClientName
+      GenerateSecret: false
+  DrawingsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: Wallis-DrawingsTable
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  FetchDrawingsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: FetchDrawingsFunction
+      Handler: app.lambdaHandler
+      Runtime: nodejs12.x
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: DrawingsTable
+      Environment:
+        Variables:
+          CURRENT_TABLE:
+            Ref: DrawingsTable
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyApi
+            Path: /drawings
+            Method: get
+  SaveDrawingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: SaveDrawingFunction
+      Handler: app.lambdaHandler
+      Runtime: nodejs12.x
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: DrawingsTable
+      Environment:
+        Variables:
+          CURRENT_TABLE:
+            Ref: DrawingsTable
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyApi
+            Path: /drawing
+            Method: post
+  DeleteDrawingFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: DeleteDrawingFunction
+      Handler: app.lambdaHandler
+      Runtime: nodejs12.x
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: DrawingsTable
+      Environment:
+        Variables:
+          CURRENT_TABLE:
+            Ref: DrawingsTable
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyApi
+            Path: /drawing
+            Method: delete
+  RenderPDFFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: RenderPDFFunction
+      Handler: app.lambdaHandler
+      Runtime: nodejs12.x
+      Timeout: 30
+      MemorySize: 512
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyApi
+            Path: /render-pdf
+            Method: post
+  SaveImageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: SaveImageFunction
+      Handler: app.lambdaHandler
+      Runtime: nodejs12.x
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: MyApi
+            Path: /save-image
+            Method: post
+Outputs:
+  DataEndpoint:
+    Description: API Endpoint
+    Value:
+      Fn::Sub: https://${MyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod
+  CognitoUserPool:
+    Description: Cognito User Pool
+    Value:
+      Fn::Sub: ${MyCognitoUserPool}
+  CognitoUserPoolClient:
+    Description: Cognito User Pool Client
+    Value:
+      Fn::Sub: ${MyCognitoUserPoolClient}

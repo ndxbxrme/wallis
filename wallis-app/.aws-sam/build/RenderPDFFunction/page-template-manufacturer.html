@@ -1,0 +1,55 @@
+<div class="drawing">
+  <div class="heading">
+    <div></div>
+    <div class="title">Manufacturing Drawing</div>
+    <div class="pageno">{{page}} of {{totalPages}}</div>
+  </div>
+  <div class="images">
+    {{images}}
+  </div>
+  <div class="details">
+    <div class="table">
+      <div class="content">
+        <label>Drawing Ref</label>
+        <div>ANW-EBC-{{number}}{{version>1?'-' + (version-1) : ''}}</div>
+        <label>Bar Material</label>
+        <div>{{base.barMaterial}}</div>
+        <label>Stud Assembly</label>
+        <div>{{getStudAssembly(this)}}</div>
+        <label>Part &numero;</label>
+        <div>EBC{{number}}{{version>1?'-' + (version-1) : ''}}</div>
+        <label>Bar Size (W x T)</label>
+        <div>{{base.w}} x {{base.h}}</div>
+        <label>Insulators</label>
+        <div>{{base.insulatorMaterial}}</div>
+        <label>Revision &numero;</label>
+        <div>{{pad(version ? version : '1',2)}}</div>
+        <label>Length</label>
+        <div>{{width}}</div>
+        <label>Base</label>
+        <div>{{base.baseMaterial}}</div>
+        <label>Drawing Date</label>
+        <div>{{new Date().toISOString().split(/T/)[0].split('-').reverse().join('/')}}</div>
+        <label>Quantity</label>
+        <div>{{pad(base.quantity, 2)}}</div>
+        <label>Drawn By</label>
+        <div class="drawn-by">
+          <span>{{user}}</span>
+          {{this.authorize ? '<label class="authorized">Authorised by</label><div class="authorized-user"></div>' : ''}}
+        </div>
+      </div>
+      <div class="notes">
+        <label>Notes</label>
+        <ol>
+          <li>Not to scale</li>
+          <li>All dimensions in mm</li>
+          <li>All sharp edges removed</li>
+        </ol>
+        <label>Key</label>
+        <p>INS = Insulator</p>
+      </div>
+      <div class="disclaimer">THIS DRAWING IS THE PROPERTY OF AN WALLIS AND MAY NOT COPIED, REPRODUCED OR BE USED FOR ANY PURPOSE OTHER THAN WHICH IT IS SUPPLIED</div>
+    </div>
+    {{(client=clients[base.client]) && '<div class="logo"><img src="https://wallis-app-dev.s3.eu-west-1.amazonaws.com/assets/' + client.logo + '" /></div><div class="address">' + client.address + '</div>' || '<div class="no-client"></div>'}}
+  </div>
+</div>

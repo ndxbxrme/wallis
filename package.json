@@ -1,0 +1,33 @@
+{
+  "name": "wallis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --host 0.0.0.0",
+    "build": "webpack --config webpack.prod.js",
+    "deploy": "npm run build && cp -r src/assets app && aws s3 sync app s3://wallis-app-dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-amplify": "^4.2.2",
+    "deep-diff": "^1.0.2",
+    "jwt-decode": "^3.1.2",
+    "three": "^0.128.0",
+    "tippy.js": "^6.3.1"
+  },
+  "devDependencies": {
+    "css-loader": "^5.2.6",
+    "csv-loader": "^3.0.3",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^4.3.0",
+    "style-loader": "^2.0.0",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.2",
+    "webpack-merge": "^4.2.2"
+  }
+}
