@@ -1326,8 +1326,7 @@ module.exports = async (tippy, auth) => {
             await API.post('WallisAPI', '/save-image', {body:{key:`plan/${selection.id}-${selection.revisions.length}-${i}.png`,data:imgs[i],contentType:'image/png'}})
           }
           if(type==='customer') {
-            const imgs = await ebRenderer.renderThumbnail(pattern, 2000, 600, 500, 170, Math.PI / 2, false, (progress) => {
-              if(progress.noImages) noStages = progress.noImages * 3 + 2;
+            const imgs = await ebRenderer.renderThumbnail(pattern, 2000, 600, 500, 170, -Math.PI / 2, false, (progress) => {
               if(progress.event==='image') updateProgress('Rendering image', ++stage, noStages);
               if(progress.event==='label') updateProgress('Rendering labels', ++stage, noStages);
               if(progress.event==='done') updateProgress('Finished rendering', ++stage, noStages);

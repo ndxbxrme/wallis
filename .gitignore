@@ -1,9 +1,9 @@
 app
-assets
+assets_old
 node_modules
 temp
 wallis-pdf
 ETS.xcf
-ligntning-logo.jpg
+lightning-logo.jpg
 package-lock.json
 .aws-sam

@@ -41,7 +41,7 @@ exports.lambdaHandler = async (event, context) => {
           console.log('index', index, 'maxImages', maxImages);
           if(index===drawing.noImages) images += '<h1>Customer: Side view</h1>';
           images += 
-          `<div style="background-image: url(https://wallis-app-dev.s3.eu-west-1.amazonaws.com/plan/${drawing.id}-${drawing.revisions.length}-${index}.png)"></div>`;
+          `<div style="background-image: url(https://wallis-app-dev.s3.eu-west-1.amazonaws.com/side/${drawing.id}-${drawing.revisions.length}-${index}.png)"></div>`;
           index++;
         }
       }
