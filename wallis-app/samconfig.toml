@@ -1,9 +1,0 @@
-version = 0.1
-[default]
-[default.deploy]
-[default.deploy.parameters]
-stack_name = "wallis-app"
-s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-14tltw0ptvx2t"
-s3_prefix = "wallis-app"
-region = "eu-west-1"
-capabilities = "CAPABILITY_IAM"
