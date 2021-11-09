@@ -2,7 +2,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      -name: Get branch name
+      - name: Get branch name
         run: echo "BRANCH=$(git rev-parse --abbrev-ref HEAD)" >> $GITHUB_ENV
-      -name: Debug
+      - name: Debug
         run: echo ${{ env.BRANCH }}
